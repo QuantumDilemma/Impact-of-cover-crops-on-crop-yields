@@ -102,7 +102,7 @@ yield_mod <- glm(
 )
 ```
 
-With the regression model fitted we now need roust standard errors
+With the regression model fitted, we now need robust standard errors
 
 ```{r}
 #estimate regression parameters for the weighted regression model
