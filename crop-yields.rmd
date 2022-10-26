@@ -41,11 +41,75 @@ bal.tab(
 )
 ```
 
-The SMDs are outside of the recommended -0.1 and 0.1 range.
-
-The variance ratio for age_avg is within the recommended range of 0.5 - 2.0
+- The SMDs are outside of the recommended -0.1 and 0.1 range.
+- The variance ratio for age_avg is within the recommended range of 0.5 - 2.0
 
 ```{r}
-
+# Calculate IPTW weights with initial propensity score model
+farm_iptw <- weightit(
+  cover_10 ~ region + total_avg + insurance_avg + fertilizer_per_area,
+  data = farms_df,
+  estimand = "ATE",
+  method = "ps"
+)
 ```
 
+```{r}
+#plot love plot to evaluate SMD for farm_iptw before and after weighting
+love.plot(
+  x = farm_iptw,
+  binary = "std",
+  thresholds = c(m = 0.1)
+)
+```
+Close after weighting but needs refinement.
+
+```{r}
+#create new propensity score model with new values
+farm_iptw2 <- weightit(
+  cover_10 ~ region + total_avg + insurance_avg + age_avg + easement_p + experience_avg + conservation_till_avg,
+  data = farms_df,
+  estimand = "ATE",
+  method = "ps"
+)
+```
+
+```{r}
+#plot love plot showing SMD of new propensity score model
+love.plot(
+  x = farm_iptw2,
+  binary = "std",
+  thresholds = c(m = 0.1)
+)
+```
+The SMD values are closer to zero than before, showing that this model is an improvement.
+
+```{r}
+#plot bal plot to show propensity scores before and after weighting
+bal.plot(
+  x = farm_iptw2,
+  var.name = "prop.score",
+  which = "both"
+)
+```
+
+```{r}
+#fit a regression model for total crop yield as the outcome, cover crop useage as the treatment and other variables from the propensity score model as other predictors
+yield_mod <- glm(
+  total_yield ~ cover_10 + region + total_avg + insurance_avg + age_avg + easement_p + experience_avg + conservation_till_avg,
+  data = farms_df,
+  weights = farm_iptw2$weights
+)
+```
+
+With the regression model fitted we now need roust standard errors
+
+```{r}
+#estimate regression parameters for the weighted regression model
+coeftest(
+  yield_mod,
+  vcov. = vcovHC
+)
+```
+
+The estimate of the ATE (Average Treatment Effect) for cover_10 (at least 10% of farms have cover crops) on total yield is 3.58. Meaning that for counties that have at least 10% of farms with cover crops, the yield increases by 3.58 units (bushels per acre).
