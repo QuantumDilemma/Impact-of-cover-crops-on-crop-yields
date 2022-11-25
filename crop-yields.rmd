@@ -112,4 +112,5 @@ coeftest(
 )
 ```
 
-The estimate of the ATE (Average Treatment Effect) for cover_10 (at least 10% of farms have cover crops) on total yield is 3.58. Meaning that for counties that have at least 10% of farms with cover crops, the yield increases by 3.58 units (bushels per acre).
+The estimate of the ATE (Average Treatment Effect) for cover_10 (at least 10% of farms have cover crops) on total yield is 3.58.
+Meaning that for counties that have at least 10% of farms with cover crops, the yield increases by 3.58 units (bushels per acre).
